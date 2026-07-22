@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24h Pallavolo - Gestione Evento</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f1f5f9 0%, #fff 50%, #eef2ff 100%); min-height: 100vh; color: #1e293b; }
+    .header { background: rgba(255,255,255,0.95); border-bottom: 1px solid #e2e8f0; padding: 12px 20px; position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .logo-icon svg { width: 22px; height: 22px; }
+    .logo-text h1 { font-size: 18px; font-weight: 700; }
+    .logo-text p { font-size: 11px; color: #64748b; }
+    .nav { display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; gap: 4px; }
+    .nav-btn { padding: 10px 16px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .nav-btn:hover { color: #475569; }
+    .nav-btn.active { background: white; color: #4f46e5; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .nav-btn svg { width: 16px; height: 16px; }
+    .main { max-width: 1600px; margin: 0 auto; padding: 20px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .controls { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+    .control-group { display: flex; align-items: center; gap: 8px; }
+    .control-group label { font-size: 13px; font-weight: 600; color: #475569; }
+    select, input[type="text"], input[type="tel"] { padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    select:focus, input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .btn { padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-whatsapp { background: #25D366; color: white; }
+    .btn-whatsapp:hover { background: #1da851; }
+    .btn-amber { background: #f59e0b; color: white; }
+    .btn-amber:hover { background: #d97706; }
+    .ml-auto { margin-left: auto; }
+    .gap-8 { display: flex; gap: 8px; flex-wrap: wrap; }
+    .table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid #e2e8f0; padding: 7px 10px; text-align: left; }
+    th { font-weight: 600; font-size: 12px; }
+    .th-hour { background: #1e293b; color: white; text-align: center; width: 66px; }
+    .th-cassa { background: #fef3c7; color: #92400e; }
+    .th-bar { background: #dbeafe; color: #1e40af; }
+    .th-segnapunti { background: #dcfce7; color: #166534; }
+    .th-arbitro { background: #f3e8ff; color: #6b21a8; }
+    .td-hour { background: #f8fafc; text-align: center; font-weight: 700; color: #475569; }
+    .td-cassa { background: #fffbeb; }
+    .td-bar { background: #eff6ff; }
+    .td-segnapunti { background: #f0fdf4; }
+    .td-arbitro { background: #faf5ff; }
+    .cell-input { width: 100%; border: none; background: transparent; padding: 4px; font-size: 12px; outline: none; }
+    .cell-input:focus { background: white; box-shadow: inset 0 0 0 2px #6366f1; border-radius: 4px; }
+    .day-separator { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; }
+    .day-separator td { background: transparent !important; color: white; font-weight: 700; font-size: 14px; text-align: center; padding: 10px; border-color: #4f46e5; }
+    .day-separator input { background: rgba(255,255,255,0.2); border: 1px dashed rgba(255,255,255,0.5); color: white; font-weight: 700; font-size: 14px; text-align: center; padding: 4px 12px; border-radius: 6px; width: auto; min-width: 220px; }
+    .day-separator input:focus { background: rgba(255,255,255,0.3); border-color: white; box-shadow: none; }
+    .stats-container { margin-top: 20px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; overflow-x: auto; }
+    .stats-container h3 { padding: 12px 16px; font-size: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px 12px 0 0; }
+    .stats-table th { background: #f1f5f9; text-align: center; }
+    .stats-table td { text-align: center; }
+    .stats-table td:first-child { text-align: left; font-weight: 600; }
+    .stats-total { font-weight: 700; background: #fef3c7 !important; }
+    .tabs { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: white; color: #4f46e5; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+    .team-card { background: white; border-radius: 10px; padding: 12px; border: 2px solid #e2e8f0; }
+    .team-card.verdi { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4, white); }
+    .team-card.bianchi { border-color: #d1d5db; background: linear-gradient(135deg, #f9fafb, white); }
+    .team-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .team-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+    .team-badge.verdi { background: #22c55e; color: white; }
+    .team-badge.bianchi { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .team-badge .dot-sm { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .team-badge .dot-sm.green { background: white; }
+    .team-badge .dot-sm.gray { background: #9ca3af; }
+    .team-actions { display: flex; gap: 3px; }
+    .team-actions button { padding: 3px 7px; font-size: 11px; border-radius: 6px; }
+    .team-name-input { font-size: 15px; font-weight: 700; color: #1e293b; border: 1px solid transparent; background: transparent; padding: 4px 8px; margin: -4px -8px; border-radius: 6px; width: calc(100% + 16px); }
+    .team-name-input:hover { background: rgba(0,0,0,0.03); }
+    .team-name-input:focus { border-color: #6366f1; background: white; }
+    .team-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .team-field { display: flex; flex-direction: column; gap: 2px; }
+    .team-field label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
+    .team-field input { padding: 6px 8px; font-size: 12px; }
+    .members-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+    .members-section > label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .member-row { display: flex; gap: 4px; margin-bottom: 4px; }
+    .member-row input { flex: 1; padding: 5px 8px; font-size: 12px; }
+    .member-row input.duplicate { border-color: #f87171; background: #fef2f2; }
+    .btn-icon { padding: 4px 8px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon:hover { background: #fecaca; }
+    .btn-icon svg { width: 14px; height: 14px; }
+    .btn-add-member { margin-top: 6px; padding: 5px 10px; font-size: 11px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; color: #475569; }
+    .btn-add-member:hover { background: #e2e8f0; }
+    .warning-box { background: #fef2f2; border: 2px solid #fecaca; border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+    .warning-box h3 { color: #dc2626; font-size: 14px; margin-bottom: 8px; }
+    .warning-box p { font-size: 12px; color: #b91c1c; margin-bottom: 4px; }
+    .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .section-header h3 { font-size: 16px; font-weight: 700; }
+    .section-header .dot { width: 14px; height: 14px; border-radius: 50%; }
+    .section-header .dot.verdi { background: #22c55e; }
+    .section-header .dot.bianchi { background: #d1d5db; border: 1px solid #9ca3af; }
+    .section-header .count { font-size: 13px; color: #64748b; font-weight: normal; }
+    .th-verde { background: #dcfce7; color: #166534; }
+    .th-bianco { background: #f3f4f6; color: #374151; }
+    .th-vs { background: #f8fafc; color: #94a3b8; width: 50px; text-align: center; }
+    .th-ref { background: #eff6ff; color: #1e40af; }
+    .td-verde { background: #f0fdf4; vertical-align: top; }
+    .td-bianco { background: #fafafa; vertical-align: top; }
+    .td-vs { text-align: center; color: #94a3b8; font-weight: 700; vertical-align: middle; }
+    .match-team-cell { min-width: 200px; }
+    .match-team-name { font-weight: 600; font-size: 13px; color: #1e293b; margin-top: 6px; }
+    .match-team-members { font-size: 11px; color: #64748b; line-height: 1.4; margin-top: 2px; }
+    .match-ref { font-size: 11px; color: #64748b; vertical-align: top; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal h3 { font-size: 18px; margin-bottom: 16px; }
+    .modal-schedule { background: #f8fafc; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .member-count { display: inline-block; font-size: 10px; background: #e2e8f0; color: #475569; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+    /* CENA */
+    .cena-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .cena-stat { background: white; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #e2e8f0; }
+    .cena-stat .num { font-size: 24px; font-weight: 700; color: #1e293b; }
+    .cena-stat .label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+    .cena-stat.green { border-color: #86efac; background: #f0fdf4; }
+    .cena-stat.green .num { color: #16a34a; }
+    .cena-stat.amber { border-color: #fcd34d; background: #fffbeb; }
+    .cena-stat.amber .num { color: #d97706; }
+    .cena-stat.red { border-color: #fca5a5; background: #fef2f2; }
+    .cena-stat.red .num { color: #dc2626; }
+    .cena-stat.blue { border-color: #93c5fd; background: #eff6ff; }
+    .cena-stat.blue .num { color: #2563eb; }
+    .cena-stat.purple { border-color: #c4b5fd; background: #f5f3ff; }
+    .cena-stat.purple .num { color: #7c3aed; }
+    .reservations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+    .res-card { background: white; border-radius: 12px; border: 2px solid #e2e8f0; overflow: hidden; }
+    .res-header { background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 10px 12px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+    .res-header-left { display: flex; flex-direction: column; gap: 2px; }
+    .res-booker { font-weight: 700; font-size: 13px; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+    .res-phone { font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+    .res-phone svg { width: 12px; height: 12px; }
+    .res-header-right { display: flex; gap: 4px; }
+    .res-body { padding: 10px 12px; }
+    .res-person { display: flex; align-items: center; gap: 6px; padding: 7px 0; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; }
+    .res-person:last-child { border-bottom: none; }
+    .res-person-name { font-weight: 600; font-size: 12px; min-width: 100px; }
+    .res-person-phone { font-size: 10px; color: #64748b; }
+    .res-badges { display: flex; gap: 3px; flex-wrap: wrap; margin-left: auto; }
+    .badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 10px; display: inline-flex; align-items: center; gap: 3px; }
+    .badge svg { width: 10px; height: 10px; }
+    .badge-child { background: #dbeafe; color: #1e40af; }
+    .badge-free { background: #dcfce7; color: #166534; }
+    .badge-pagante { background: #fef3c7; color: #92400e; }
+    .badge-nonpagante { background: #f1f5f9; color: #475569; }
+    .badge-incassato { background: #d1fae5; color: #065f46; }
+    .badge-da-incassare { background: #fee2e2; color: #b91c1c; }
+    .badge-booker { background: #6366f1; color: white; }
+    .res-actions-person { display: flex; gap: 3px; }
+    .res-actions-person button { padding: 3px 6px; font-size: 9px; border-radius: 4px; border: none; cursor: pointer; }
+    .res-footer { padding: 8px 12px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+    .add-person-btn { width: 100%; padding: 7px; background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 11px; color: #64748b; cursor: pointer; transition: all 0.15s; }
+    .add-person-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+    .person-form { background: #fafafa; border-radius: 8px; padding: 12px; margin: 8px 12px 12px; border: 1px solid #e2e8f0; }
+    .pf-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pf-row input[type="text"], .pf-row input[type="tel"] { flex: 1; min-width: 120px; }
+    .pf-checks { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .pf-check { display: flex; align-items: center; gap: 5px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 500; user-select: none; transition: all 0.15s; }
+    .pf-check:hover { background: #e2e8f0; }
+    .pf-check.active { background: #4f46e5; color: white; border-color: #4f46e5; }
+    .pf-check.active-green { background: #16a34a; color: white; border-color: #16a34a; }
+    .pf-check.active-amber { background: #d97706; color: white; border-color: #d97706; }
+    .pf-check input[type="checkbox"] { display: none; }
+    .pf-check svg { width: 14px; height: 14px; }
+    .pf-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    /* Booker star */
+    .booker-toggle { background: none; border: 2px solid #e2e8f0; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+    .booker-toggle svg { width: 16px; height: 16px; color: #cbd5e1; }
+    .booker-toggle:hover { border-color: #6366f1; background: #eef2ff; }
+    .booker-toggle:hover svg { color: #6366f1; }
+    .booker-toggle.active { background: #6366f1; border-color: #6366f1; }
+    .booker-toggle.active svg { color: white; }
+    .booker-hint { font-size: 10px; color: #94a3b8; font-style: italic; margin-left: 4px; }
+    /* Lista cena */
+    .cena-list-table th { background: #f1f5f9; font-size: 11px; }
+    .cena-list-table .row-pagante { background: #fffbeb; }
+    .cena-list-table .row-nonpagante { background: #f0fdf4; }
+    .cena-list-table .row-incassato { background: #f0fdf4; }
+    .cena-list-table td.col-check { text-align: center; width: 50px; font-size: 16px; }
+    .cena-list-section-header td { background: #1e293b !important; color: white; font-weight: 700; font-size: 13px; padding: 8px 10px; text-align: left; }
+    /* Print */
+    @media print {
+      @page { size: A4 portrait; margin: 8mm; }
+      body { background: white !important; font-size: 11px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .header, .controls, .nav, .tabs, .team-actions, .modal-overlay, .btn, .btn-add-member, .btn-icon, .warning-box, #person-schedule-preview, .add-person-btn, .person-form, .res-actions-person, .res-header-right, .reservations-grid, .res-footer, select, .cena-screen-only, #cena-screen-list, .booker-toggle, .booker-hint { display: none !important; }
+      .main { padding: 0 !important; max-width: none !important; }
+      .page { display: block !important; }
+      .page:not(.print-active) { display: none !important; }
+      .print-title { display: block !important; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 6px; }
+      .print-subtitle { display: block !important; text-align: center; font-size: 12px; color: #666; margin-bottom: 12px; }
+      table { font-size: 10px !important; }
+      th, td { padding: 4px 6px !important; border: 1px solid #999 !important; }
+      .cell-input, .day-separator input, .team-name-input { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 2px !important; }
+      .day-separator { background: #1e293b !important; }
+      .day-separator td { color: white !important; }
+      .day-separator input { color: white !important; font-size: 11px !important; }
+      input { border: none !important; padding: 0 !important; font-size: 10px !important; background: transparent !important; }
+      .teams-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+      .team-card { padding: 6px !important; break-inside: avoid; page-break-inside: avoid; }
+      .team-name-input { font-size: 11px !important; }
+      .table-container, .stats-container { box-shadow: none !important; border: none !important; }
+      .section-header { page-break-after: avoid; }
+      .members-section { border-top: 1px solid #ccc !important; }
+      .match-team-cell { min-width: auto !important; }
+      .stats-container { page-break-before: always; }
+      .stats-container h3 { background: #eee !important; }
+      .cena-summary { grid-template-columns: repeat(3, 1fr) !important; margin-bottom: 12px !important; }
+      .cena-stat { padding: 6px !important; }
+      .cena-stat .num { font-size: 16px !important; }
+      .cena-stat .label { font-size: 8px !important; }
+      #cena-print-list { display: block !important; }
+      .cena-list-table td.col-check { font-size: 18px !important; }
+      .cena-list-section-header td { background: #333 !important; color: white !important; }
+    }
+    .print-title, .print-subtitle { display: none; }
+    #cena-print-list { display: none; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="logo-text"><h1>24 Ore di Pallavolo</h1><p>Gestione Evento</p></div>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" onclick="showPage('staff', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg> Staff</button>
+        <button class="nav-btn" onclick="showPage('teams', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Squadre</button>
+        <button class="nav-btn" onclick="showPage('cena', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> Cena</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- STAFF -->
+    <div id="page-staff" class="page active">
+      <h2 class="print-title">24 Ore di Pallavolo — Turni Staff</h2>
+      <p class="print-subtitle">Cassa · Bar · Segnapunti · Arbitro</p>
+      <div class="controls">
+        <div class="control-group"><label>Ora inizio:</label><select id="staff-start-hour" onchange="rebuildStaffTable()"></select></div>
+        <div class="control-group"><label>Invia a:</label><select id="person-select" onchange="updatePersonSchedule()"><option value="">—</option></select></div>
+        <button class="btn btn-whatsapp" onclick="sendWhatsApp()" id="btn-whatsapp" disabled><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.79 23.492l4.594-1.198A11.96 11.96 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.332 0-4.487-.78-6.213-2.094l-.354-.282-3.676.964.982-3.588-.309-.492A9.96 9.96 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg> WhatsApp</button>
+        <div class="ml-auto gap-8">
+          <button class="btn btn-amber" onclick="exportStaffCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button>
+          <button class="btn btn-secondary" onclick="exportStaffJSON()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+          <button class="btn btn-secondary" onclick="importStaffJSON()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+          <button class="btn btn-primary" onclick="printPage('staff')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+          <button class="btn btn-danger" onclick="clearStaffData()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div>
+      </div>
+      <div id="person-schedule-preview" style="display:none; margin-bottom:16px; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:12px;">
+        <strong id="person-schedule-name"></strong>
+        <pre id="person-schedule-text" style="margin-top:8px; font-size:12px; white-space:pre-wrap;"></pre>
+      </div>
+      <div class="table-container">
+        <table><thead>
+          <tr><th class="th-hour">Ora</th><th class="th-cassa" colspan="2">Cassa</th><th class="th-bar" colspan="2">Bar</th><th class="th-segnapunti" colspan="2">Segnapunti</th><th class="th-arbitro" colspan="2">Arbitro</th></tr>
+          <tr><th class="th-hour"></th><th class="th-cassa">1</th><th class="th-cassa">2</th><th class="th-bar">1</th><th class="th-bar">2</th><th class="th-segnapunti">1</th><th class="th-segnapunti">2</th><th class="th-arbitro">1</th><th class="th-arbitro">2</th></tr>
+        </thead><tbody id="staff-tbody"></tbody></table>
+      </div>
+      <div id="staff-stats" class="stats-container" style="display:none;"><h3>Riepilogo Turni</h3><div id="staff-stats-body"></div></div>
+    </div>
+
+    <!-- TEAMS -->
+    <div id="page-teams" class="page">
+      <h2 class="print-title">24 Ore di Pallavolo — Squadre e Partite</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTeamTab('squadre', this)">Squadre</button>
+        <button class="tab-btn" onclick="showTeamTab('partite', this)">Partite</button>
+      </div>
+      <div id="duplicate-warnings" class="warning-box" style="display:none;"><h3>Nomi duplicati tra Verdi e Bianchi!</h3><div id="duplicate-list"></div></div>
+      <div class="controls">
+        <div class="control-group" id="team-controls"><label>Filtra:</label><select id="team-filter" onchange="renderTeams()"><option value="all">Tutte</option><option value="verdi">Verdi</option><option value="bianchi">Bianchi</option></select><button class="btn btn-success" onclick="addTeam('verdi')">+ Verde</button><button class="btn btn-secondary" onclick="addTeam('bianchi')">+ Bianca</button></div>
+        <div class="control-group" id="match-controls" style="display:none;"><label>Ora inizio:</label><select id="match-start-hour" onchange="rebuildMatchTable()"></select></div>
+        <div class="ml-auto gap-8"><button class="btn btn-amber" onclick="exportTeamsCSV()">CSV</button><button class="btn btn-secondary" onclick="exportTeamsJSON()">Salva</button><button class="btn btn-secondary" onclick="importTeamsJSON()">Carica</button><button class="btn btn-primary" onclick="printPage('teams')">Stampa</button><button class="btn btn-danger" onclick="clearTeamsData()">Canc.</button></div>
+      </div>
+      <div id="tab-squadre" class="team-tab">
+        <div class="section-header" id="section-verdi"><span class="dot verdi"></span><h3 style="color:#166534;">Squadre Verdi</h3><span class="count" id="count-verdi">(0)</span></div>
+        <div class="teams-grid" id="teams-verdi"></div>
+        <div class="section-header" id="section-bianchi" style="margin-top:24px;"><span class="dot bianchi"></span><h3 style="color:#374151;">Squadre Bianchi</h3><span class="count" id="count-bianchi">(0)</span></div>
+        <div class="teams-grid" id="teams-bianchi"></div>
+      </div>
+      <div id="tab-partite" class="team-tab" style="display:none;">
+        <p class="print-subtitle">Partite con componenti</p>
+        <div class="table-container"><table><thead><tr><th class="th-hour">Ora</th><th class="th-verde">Verdi</th><th class="th-vs">VS</th><th class="th-bianco">Bianchi</th><th class="th-ref">Ref.</th></tr></thead><tbody id="match-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CENA -->
+    <div id="page-cena" class="page">
+      <h2 class="print-title">Prenotazioni Cena — &euro;15 a persona</h2>
+      <p class="print-subtitle">Bambini &le;7 anni: non paganti</p>
+      <div class="controls">
+        <button class="btn btn-success" onclick="addReservation()">+ Nuova Prenotazione</button>
+        <div class="control-group"><label>Ordina:</label><select id="cena-sort" onchange="renderCena()"><option value="unpaid">Da incassare prima</option><option value="alpha">Alfabetico</option><option value="insert">Inserimento</option><option value="paid">Incassato prima</option></select></div>
+        <div class="control-group"><label>Stampa:</label><select id="cena-print-mode" onchange="renderCenaList()"><option value="grouped">Per categoria</option><option value="flat">Lista unica</option></select></div>
+        <div class="ml-auto gap-8"><button class="btn btn-amber" onclick="exportCenaCSV()">CSV</button><button class="btn btn-secondary" onclick="exportCenaJSON()">Salva</button><button class="btn btn-secondary" onclick="importCenaJSON()">Carica</button><button class="btn btn-primary" onclick="printPage('cena')">Stampa</button><button class="btn btn-danger" onclick="clearCenaData()">Canc.</button></div>
+      </div>
+      <div class="cena-summary" id="cena-summary"></div>
+      <div class="cena-screen-only"><div class="reservations-grid" id="reservations-grid"></div></div>
+      <div id="cena-screen-list" class="table-container" style="margin-top:20px;"></div>
+      <div id="cena-print-list"></div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="whatsapp-modal" onclick="if(event.target===this)closeWhatsAppModal()">
+    <div class="modal">
+      <h3>Invia turni su WhatsApp</h3>
+      <p style="margin-bottom:12px; font-size:13px; color:#64748b;">Numero con prefisso (+39...)</p>
+      <input type="tel" id="whatsapp-phone" placeholder="+39 333 1234567" style="width:100%; margin-bottom:12px;">
+      <div class="modal-schedule" id="modal-schedule-preview"></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeWhatsAppModal()">Annulla</button><button class="btn btn-whatsapp" onclick="openWhatsApp()">Apri WhatsApp</button></div>
+    </div>
+  </div>
+
+<script>
+const PRICE=15;
+// SVG icons
+const IC={
+  star:`<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  starOff:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  edit:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  child:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 8v4m-4 4l4-4 4 4m-4 0v4"/></svg>`,
+  coin:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9.5C9 8.12 10.34 7 12 7s3 1.12 3 2.5-1.34 2.5-3 2.5-3 1.12-3 2.5 1.34 2.5 3 2.5"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+  phone:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+};
+
+function norm(n){if(!n)return'';return n.trim().split(/\s+/).map(p=>p?p[0].toUpperCase()+p.slice(1).toLowerCase():'').join(' ');}
+function hrs24(s){const h=[];for(let i=0;i<24;i++)h.push(((s+i)%24).toString().padStart(2,'0')+':00');return h;}
+function uid(){return Math.random().toString(36).substr(2,9)+Date.now().toString(36);}
+function save(k,v){try{localStorage.setItem('v7_'+k,JSON.stringify(v));}catch(e){}}
+function load(k,d){try{const s=localStorage.getItem('v7_'+k);if(s)return JSON.parse(s);}catch(e){}return d;}
+function today(){return new Date().toISOString().slice(0,10);}
+function dl(name,content,type){const blob=new Blob(['\ufeff'+content],{type:type+';charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function fileIn(accept,cb){const inp=document.createElement('input');inp.type='file';inp.accept=accept;inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>cb(ev.target.result);r.readAsText(f);};inp.click();}
+
+function showPage(p,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');if(btn)btn.classList.add('active');}
+function showTeamTab(t,btn){document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('tab-squadre').style.display=t==='squadre'?'block':'none';document.getElementById('tab-partite').style.display=t==='partite'?'block':'none';document.getElementById('team-controls').style.display=t==='squadre'?'flex':'none';document.getElementById('match-controls').style.display=t==='partite'?'flex':'none';if(t==='partite')rebuildMatchTable();}
+
+// === STAFF ===
+let SD=load('staff',{}),SH=load('staffHour',19),DL=load('dayLabels',{d1:'GIORNO 1 — Sabato',d2:'GIORNO 2 — Domenica'});
+function initStaff(){const sel=document.getElementById('staff-start-hour');sel.innerHTML='';for(let i=0;i<24;i++)sel.innerHTML+=`<option value="${i}" ${i===SH?'selected':''}>${i.toString().padStart(2,'0')}:00</option>`;rebuildStaffTable();}
+function rebuildStaffTable(){SH=parseInt(document.getElementById('staff-start-hour').value);save('staffHour',SH);const tbody=document.getElementById('staff-tbody');tbody.innerHTML='';const hrs=hrs24(SH),roles=['cassa','bar','segnapunti','arbitro'],cls={cassa:'td-cassa',bar:'td-bar',segnapunti:'td-segnapunti',arbitro:'td-arbitro'};let d2=-1;for(let i=1;i<hrs.length;i++)if(parseInt(hrs[i])<parseInt(hrs[i-1])){d2=i;break;}tbody.innerHTML+=`<tr class="day-separator"><td colspan="9"><input value="${DL.d1}" onchange="DL.d1=this.value;save('dayLabels',DL)" onclick="this.select()"></td></tr>`;hrs.forEach((h,idx)=>{if(idx===d2)tbody.innerHTML+=`<tr class="day-separator"><td colspan="9"><input value="${DL.d2}" onchange="DL.d2=this.value;save('dayLabels',DL)" onclick="this.select()"></td></tr>`;let row=`<td class="td-hour">${h}</td>`;roles.forEach(r=>{for(let p=1;p<=2;p++){const k=`${h}_${r}_${p}`;row+=`<td class="${cls[r]}"><input type="text" class="cell-input" data-key="${k}" value="${SD[k]||''}" onchange="staffCell(this)" placeholder="—"></td>`;}});tbody.innerHTML+=`<tr>${row}</tr>`;});updatePersonList();renderStaffStats();}
+function staffCell(el){const k=el.dataset.key,v=norm(el.value);el.value=v;if(v)SD[k]=v;else delete SD[k];save('staff',SD);updatePersonList();renderStaffStats();}
+function updatePersonList(){const ppl=new Set();Object.values(SD).forEach(n=>{if(n&&n.trim())ppl.add(n);});const sel=document.getElementById('person-select'),cur=sel.value;sel.innerHTML='<option value="">—</option>';[...ppl].sort().forEach(p=>{sel.innerHTML+=`<option value="${p}" ${p===cur?'selected':''}>${p}</option>`;});updatePersonSchedule();}
+function updatePersonSchedule(){const person=document.getElementById('person-select').value,prev=document.getElementById('person-schedule-preview'),btn=document.getElementById('btn-whatsapp');if(!person){prev.style.display='none';btn.disabled=true;return;}const sched=personSched(person);if(!sched.length){prev.style.display='none';btn.disabled=true;return;}prev.style.display='block';btn.disabled=false;document.getElementById('person-schedule-name').textContent=`Turni di ${person}:`;document.getElementById('person-schedule-text').textContent=schedTxt(sched);}
+function personSched(person){const out=[],labels={cassa:'Cassa',bar:'Bar',segnapunti:'Segnapunti',arbitro:'Arbitro'};hrs24(SH).forEach(h=>{['cassa','bar','segnapunti','arbitro'].forEach(r=>{for(let p=1;p<=2;p++)if(SD[`${h}_${r}_${p}`]===person)out.push({hour:h,role:labels[r]});});});return out;}
+function schedTxt(s){return s.map(x=>`${x.hour} → ${x.role}`).join('\n');}
+function renderStaffStats(){const ppl={},roles=['cassa','bar','segnapunti','arbitro'],labels={cassa:'Cassa',bar:'Bar',segnapunti:'Segna.',arbitro:'Arbitro'};Object.entries(SD).forEach(([k,n])=>{if(!n)return;const r=k.split('_')[1];if(!ppl[n])ppl[n]={cassa:0,bar:0,segnapunti:0,arbitro:0,total:0};ppl[n][r]++;ppl[n].total++;});const c=document.getElementById('staff-stats'),b=document.getElementById('staff-stats-body'),names=Object.keys(ppl).sort();if(!names.length){c.style.display='none';return;}c.style.display='block';let html=`<table class="stats-table"><thead><tr><th style="text-align:left">Persona</th>`;roles.forEach(r=>html+=`<th>${labels[r]}</th>`);html+=`<th>TOT</th></tr></thead><tbody>`;names.forEach(n=>{const p=ppl[n];html+=`<tr><td>${n}</td>`;roles.forEach(r=>html+=`<td>${p[r]||'—'}</td>`);html+=`<td class="stats-total">${p.total}</td></tr>`;});html+=`</tbody></table>`;b.innerHTML=html;}
+function sendWhatsApp(){const p=document.getElementById('person-select').value;if(!p)return;document.getElementById('modal-schedule-preview').textContent=`Turni di ${p}:\n${schedTxt(personSched(p))}`;document.getElementById('whatsapp-modal').classList.add('active');document.getElementById('whatsapp-phone').focus();}
+function closeWhatsAppModal(){document.getElementById('whatsapp-modal').classList.remove('active');}
+function openWhatsApp(){const p=document.getElementById('person-select').value;let ph=document.getElementById('whatsapp-phone').value.replace(/\s+/g,'');if(!ph){alert('Inserisci numero');return;}if(ph.startsWith('+'))ph=ph.substring(1);window.open(`https://wa.me/${ph}?text=${encodeURIComponent(`*24 Ore di Pallavolo*\n\nCiao ${p}! Ecco i tuoi turni:\n\n${schedTxt(personSched(p))}\n\nGrazie!`)}`,'_blank');closeWhatsAppModal();}
+function clearStaffData(){if(confirm('Cancellare tutti i turni?')){SD={};save('staff',SD);rebuildStaffTable();}}
+function exportStaffJSON(){dl(`turni_${today()}.json`,JSON.stringify({SD,SH,DL},null,2),'application/json');}
+function importStaffJSON(){fileIn('.json',t=>{try{const d=JSON.parse(t);if(d.SD){SD=d.SD;save('staff',SD);}if(d.SH!==undefined){SH=d.SH;save('staffHour',SH);document.getElementById('staff-start-hour').value=SH;}if(d.DL){DL=d.DL;save('dayLabels',DL);}rebuildStaffTable();alert('Importato!');}catch(e){alert('File non valido');}});}
+function exportStaffCSV(){const hrs=hrs24(SH),roles=['cassa','bar','segnapunti','arbitro'];let csv='Ora,Cassa 1,Cassa 2,Bar 1,Bar 2,Segnapunti 1,Segnapunti 2,Arbitro 1,Arbitro 2\n';hrs.forEach(h=>{let row=[h];roles.forEach(r=>{row.push(SD[`${h}_${r}_1`]||'');row.push(SD[`${h}_${r}_2`]||'');});csv+=row.map(c=>`"${c}"`).join(',')+'\n';});csv+='\n\nRIEPILOGO\nPersona,Cassa,Bar,Segnapunti,Arbitro,Totale\n';const ppl={};Object.entries(SD).forEach(([k,n])=>{if(!n)return;const r=k.split('_')[1];if(!ppl[n])ppl[n]={cassa:0,bar:0,segnapunti:0,arbitro:0,total:0};ppl[n][r]++;ppl[n].total++;});Object.keys(ppl).sort().forEach(n=>{const p=ppl[n];csv+=`"${n}",${p.cassa},${p.bar},${p.segnapunti},${p.arbitro},${p.total}\n`;});dl(`turni_${today()}.csv`,csv,'text/csv');}
+
+// === TEAMS ===
+let TM=load('teams',[]),MT=load('matches',{}),MH=load('matchHour',19),MDL=load('matchDL',{d1:'GIORNO 1 — Sabato',d2:'GIORNO 2 — Domenica'});
+function initTeams(){if(!TM.length){for(let i=0;i<24;i++)TM.push({id:uid(),name:'Squadra '+(i+1),color:'verdi',ref:'',tel:'',mb:['']});for(let i=0;i<24;i++)TM.push({id:uid(),name:'Squadra '+(i+1),color:'bianchi',ref:'',tel:'',mb:['']});save('teams',TM);}const sel=document.getElementById('match-start-hour');sel.innerHTML='';for(let i=0;i<24;i++)sel.innerHTML+=`<option value="${i}" ${i===MH?'selected':''}>${i.toString().padStart(2,'0')}:00</option>`;renderTeams();}
+function getDups(){const vn=new Map(),bn=new Map();TM.forEach(t=>{const m=t.color==='verdi'?vn:bn;(t.mb||[]).forEach(n=>{if(n&&n.trim()){const k=norm(n).toLowerCase();if(!m.has(k))m.set(k,[]);m.get(k).push(t.name);}});if(t.ref&&t.ref.trim()){const k=norm(t.ref).toLowerCase();if(!m.has(k))m.set(k,[]);m.get(k).push(t.name+' (ref.)');}});const dups=[];vn.forEach((vs,k)=>{if(bn.has(k))dups.push({name:norm(k),v:vs,b:bn.get(k)});});return dups;}
+function isDup(n){if(!n||!n.trim())return false;const k=norm(n).toLowerCase();return getDups().some(d=>d.name.toLowerCase()===k);}
+function renderDupWarn(){const d=getDups(),box=document.getElementById('duplicate-warnings');if(!d.length){box.style.display='none';return;}box.style.display='block';document.getElementById('duplicate-list').innerHTML=d.map(x=>`<p><strong>"${x.name}"</strong> — Verdi: ${x.v.join(', ')} | Bianchi: ${x.b.join(', ')}</p>`).join('');}
+function renderTeams(){const f=document.getElementById('team-filter').value,vt=TM.filter(t=>t.color==='verdi'),bt=TM.filter(t=>t.color==='bianchi');document.getElementById('count-verdi').textContent=`(${vt.length})`;document.getElementById('count-bianchi').textContent=`(${bt.length})`;const sv=f==='all'||f==='verdi',sb=f==='all'||f==='bianchi';document.getElementById('section-verdi').style.display=sv?'flex':'none';document.getElementById('teams-verdi').style.display=sv?'grid':'none';document.getElementById('section-bianchi').style.display=sb?'flex':'none';document.getElementById('teams-bianchi').style.display=sb?'grid':'none';document.getElementById('teams-verdi').innerHTML=vt.map(t=>teamCard(t)).join('');document.getElementById('teams-bianchi').innerHTML=bt.map(t=>teamCard(t)).join('');renderDupWarn();}
+function teamCard(t){const mc=(t.mb||[]).filter(m=>m&&m.trim()).length,mi=(t.mb||[]).map((m,i)=>{const dup=isDup(m);return`<div class="member-row"><input type="text" value="${m||''}" placeholder="Giocatore ${i+1}" class="${dup?'duplicate':''}" data-tid="${t.id}" data-mi="${i}" onchange="updateMember(this)"><button class="btn-icon" onclick="removeMember('${t.id}',${i})">${IC.x}</button></div>`;}).join(''),same=TM.filter(x=>x.color===t.color),idx=same.findIndex(x=>x.id===t.id),isF=idx===0,isL=idx===same.length-1;return`<div class="team-card ${t.color}" id="team-${t.id}"><div class="team-header"><span class="team-badge ${t.color}"><span class="dot-sm ${t.color==='verdi'?'green':'gray'}"></span>${t.color==='verdi'?'VERDI':'BIANCHI'}</span><span class="member-count">${mc} gioc.</span><div class="team-actions"><button class="btn btn-secondary" onclick="moveTeam('${t.id}','up')" ${isF?'disabled style="opacity:0.3"':''}>&#9650;</button><button class="btn btn-secondary" onclick="moveTeam('${t.id}','down')" ${isL?'disabled style="opacity:0.3"':''}>&#9660;</button><button class="btn btn-danger" onclick="removeTeam('${t.id}')">${IC.x}</button></div></div><input type="text" class="team-name-input" value="${t.name||''}" placeholder="Nome squadra" data-tid="${t.id}" data-field="name" onchange="updateTeamField(this)"><div class="team-row"><div class="team-field"><label>Referente</label><input type="text" value="${t.ref||''}" placeholder="Nome" class="${isDup(t.ref)?'duplicate':''}" data-tid="${t.id}" data-field="ref" onchange="updateTeamField(this)"></div><div class="team-field"><label>Telefono</label><input type="tel" value="${t.tel||''}" placeholder="+39..." data-tid="${t.id}" data-field="tel" onchange="updateTeamField(this)"></div></div><div class="members-section"><label>Componenti</label>${mi}<button class="btn-add-member" onclick="addMember('${t.id}')">+ Aggiungi</button></div></div>`;}
+function updateTeamField(el){const t=TM.find(x=>x.id===el.dataset.tid);if(!t)return;let v=el.value;if(el.dataset.field==='name'||el.dataset.field==='ref'){v=norm(v);el.value=v;}t[el.dataset.field]=v;save('teams',TM);if(el.dataset.field==='ref')el.classList.toggle('duplicate',isDup(v));renderDupWarn();}
+function updateMember(el){const t=TM.find(x=>x.id===el.dataset.tid);if(!t)return;const v=norm(el.value);el.value=v;t.mb[parseInt(el.dataset.mi)]=v;save('teams',TM);el.classList.toggle('duplicate',isDup(v));renderDupWarn();const card=document.getElementById('team-'+t.id);if(card){const cnt=card.querySelector('.member-count');if(cnt){const mc=(t.mb||[]).filter(m=>m&&m.trim()).length;cnt.textContent=`${mc} gioc.`;}}}
+function addMember(tid){const t=TM.find(x=>x.id===tid);if(!t)return;if(!t.mb)t.mb=[];t.mb.push('');save('teams',TM);const card=document.getElementById('team-'+tid);if(card){card.outerHTML=teamCard(t);setTimeout(()=>{const nc=document.getElementById('team-'+tid);const ins=nc.querySelectorAll('.member-row input');if(ins.length)ins[ins.length-1].focus();},20);}}
+function removeMember(tid,idx){const t=TM.find(x=>x.id===tid);if(!t||!t.mb)return;t.mb.splice(idx,1);if(!t.mb.length)t.mb=[''];save('teams',TM);const card=document.getElementById('team-'+tid);if(card)card.outerHTML=teamCard(t);renderDupWarn();}
+function moveTeam(tid,dir){const t=TM.find(x=>x.id===tid);if(!t)return;const same=TM.filter(x=>x.color===t.color),others=TM.filter(x=>x.color!==t.color),idx=same.findIndex(x=>x.id===tid);if(dir==='up'&&idx>0)[same[idx-1],same[idx]]=[same[idx],same[idx-1]];else if(dir==='down'&&idx<same.length-1)[same[idx],same[idx+1]]=[same[idx+1],same[idx]];else return;TM=t.color==='verdi'?[...same,...others]:[...others,...same];save('teams',TM);renderTeams();}
+function addTeam(c){const cnt=TM.filter(t=>t.color===c).length;TM.push({id:uid(),name:'Squadra '+(cnt+1),color:c,ref:'',tel:'',mb:['']});save('teams',TM);renderTeams();}
+function removeTeam(tid){if(!confirm('Rimuovere?'))return;TM=TM.filter(t=>t.id!==tid);Object.keys(MT).forEach(k=>{if(MT[k]===tid)delete MT[k];});save('teams',TM);save('matches',MT);renderTeams();}
+function rebuildMatchTable(){MH=parseInt(document.getElementById('match-start-hour').value);save('matchHour',MH);const tbody=document.getElementById('match-tbody');tbody.innerHTML='';const hrs=hrs24(MH),vt=TM.filter(t=>t.color==='verdi'),bt=TM.filter(t=>t.color==='bianchi');let d2=-1;for(let i=1;i<hrs.length;i++)if(parseInt(hrs[i])<parseInt(hrs[i-1])){d2=i;break;}tbody.innerHTML+=`<tr class="day-separator"><td colspan="5"><input value="${MDL.d1}" onchange="MDL.d1=this.value;save('matchDL',MDL)" onclick="this.select()"></td></tr>`;hrs.forEach((h,idx)=>{if(idx===d2)tbody.innerHTML+=`<tr class="day-separator"><td colspan="5"><input value="${MDL.d2}" onchange="MDL.d2=this.value;save('matchDL',MDL)" onclick="this.select()"></td></tr>`;const vid=MT[`${h}_verdi`]||'',bid=MT[`${h}_bianchi`]||'';const vT=TM.find(t=>t.id===vid),bT=TM.find(t=>t.id===bid);const vO=vt.map(t=>`<option value="${t.id}" ${t.id===vid?'selected':''}>${t.name}</option>`).join(''),bO=bt.map(t=>`<option value="${t.id}" ${t.id===bid?'selected':''}>${t.name}</option>`).join('');const vD=vT?`<div class="match-team-name">${vT.name}</div><div class="match-team-members">${(vT.mb||[]).filter(m=>m&&m.trim()).join(', ')||'—'}</div>`:'',bD=bT?`<div class="match-team-name">${bT.name}</div><div class="match-team-members">${(bT.mb||[]).filter(m=>m&&m.trim()).join(', ')||'—'}</div>`:'';const rV=vT&&vT.ref?`<div>${vT.ref} ${vT.tel||''}</div>`:'',rB=bT&&bT.ref?`<div>${bT.ref} ${bT.tel||''}</div>`:'';tbody.innerHTML+=`<tr><td class="td-hour">${h}</td><td class="td-verde match-team-cell"><select onchange="setMatch('${h}_verdi',this.value)"><option value="">—</option>${vO}</select>${vD}</td><td class="td-vs">VS</td><td class="td-bianco match-team-cell"><select onchange="setMatch('${h}_bianchi',this.value)"><option value="">—</option>${bO}</select>${bD}</td><td class="match-ref">${rV}${rB}</td></tr>`;});}
+function setMatch(k,v){if(v)MT[k]=v;else delete MT[k];save('matches',MT);rebuildMatchTable();}
+function clearTeamsData(){if(!confirm('Cancellare tutto?'))return;TM=[];MT={};save('teams',TM);save('matches',MT);initTeams();}
+function exportTeamsJSON(){dl(`squadre_${today()}.json`,JSON.stringify({TM,MT,MH,MDL},null,2),'application/json');}
+function importTeamsJSON(){fileIn('.json',t=>{try{const d=JSON.parse(t);if(d.TM){TM=d.TM;save('teams',TM);}if(d.MT){MT=d.MT;save('matches',MT);}if(d.MH!==undefined){MH=d.MH;save('matchHour',MH);document.getElementById('match-start-hour').value=MH;}if(d.MDL){MDL=d.MDL;save('matchDL',MDL);}renderTeams();alert('Importato!');}catch(e){alert('File non valido');}});}
+function exportTeamsCSV(){let csv='Colore,Nome,Referente,Telefono,Giocatori\n';TM.forEach(t=>{csv+=`"${t.color==='verdi'?'VERDI':'BIANCHI'}","${t.name}","${t.ref||''}","${t.tel||''}","${(t.mb||[]).filter(m=>m&&m.trim()).join(' | ')}"\n`;});csv+='\n\nPARTITE\nOra,Verdi,Componenti,Bianchi,Componenti,Ref V,Tel V,Ref B,Tel B\n';hrs24(MH).forEach(h=>{const vt=TM.find(t=>t.id===MT[`${h}_verdi`]),bt=TM.find(t=>t.id===MT[`${h}_bianchi`]);csv+=[`"${h}"`,`"${vt?vt.name:''}"`,`"${vt?(vt.mb||[]).filter(m=>m&&m.trim()).join(', '):''}"`,`"${bt?bt.name:''}"`,`"${bt?(bt.mb||[]).filter(m=>m&&m.trim()).join(', '):''}"`,`"${vt?vt.ref||'':''}"`,`"${vt?vt.tel||'':''}"`,`"${bt?bt.ref||'':''}"`,`"${bt?bt.tel||'':''}"`].join(',')+'\n';});dl(`squadre_${today()}.csv`,csv,'text/csv');}
+
+// === CENA ===
+let RES=load('cena',[]);
+function initCena(){renderCena();}
+function getBooker(r){return(r.people||[]).find(p=>p.isBooker)||null;}
+function getAllPeople(){const list=[];let idx=0;RES.forEach(r=>{const bk=getBooker(r);(r.people||[]).forEach(p=>{list.push({...p,booker:bk?bk.name:'',bookerPhone:bk?bk.phone:'',resId:r.id,insertIdx:idx++});});});return list;}
+function sortPeople(list,mode){if(mode==='alpha')return list.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));if(mode==='paid')return list.slice().sort((a,b)=>{const sa=a.pagante?(a.incassato?0:1):2,sb=b.pagante?(b.incassato?0:1):2;return sa-sb||(a.name||'').localeCompare(b.name||'');});if(mode==='unpaid')return list.slice().sort((a,b)=>{const sa=a.pagante&&!a.incassato?0:(a.pagante?2:1),sb=b.pagante&&!b.incassato?0:(b.pagante?2:1);return sa-sb||(a.name||'').localeCompare(b.name||'');});return list;}
+
+function renderCena(){renderCenaSummary();document.getElementById('reservations-grid').innerHTML=RES.map(r=>resCard(r)).join('');renderCenaList();}
+function renderCenaSummary(){let tot=0,bambini=0,under7=0,paganti=0,incassati=0,daInc=0;RES.forEach(r=>{(r.people||[]).forEach(p=>{tot++;if(p.child){bambini++;if(p.under7)under7++;}if(p.pagante){paganti++;if(p.incassato)incassati++;else daInc++;}});});document.getElementById('cena-summary').innerHTML=`<div class="cena-stat"><div class="num">${tot}</div><div class="label">Persone</div></div><div class="cena-stat blue"><div class="num">${bambini}</div><div class="label">Bambini</div></div><div class="cena-stat"><div class="num">${under7}</div><div class="label">&le;7 non pag.</div></div><div class="cena-stat amber"><div class="num">${paganti}</div><div class="label">Paganti</div></div><div class="cena-stat green"><div class="num">&euro;${incassati*PRICE}</div><div class="label">Incassato</div></div><div class="cena-stat red"><div class="num">&euro;${daInc*PRICE}</div><div class="label">Da incassare</div></div>`;}
+
+function buildListHtml(people,grouped){let html=`<table class="cena-list-table"><thead><tr><th style="width:30px">#</th><th>Nome</th><th style="width:55px">Tipo</th><th style="width:65px">Stato</th><th style="width:95px">Telefono</th><th style="width:85px">Prenot. da</th><th style="width:50px;text-align:center">Pres.</th><th style="width:50px;text-align:center">Pag.</th></tr></thead><tbody>`;let n=0;function addRow(p,cls){n++;const tipo=p.child?(p.under7?'B. &le;7':'Bamb.'):'Adulto';const stato=!p.pagante?'Non pag.':(p.incassato?'Incass.':'Da inc.');html+=`<tr class="${cls}"><td>${n}</td><td><strong>${p.name||'—'}</strong></td><td>${tipo}</td><td>${stato}</td><td>${p.phone||p.bookerPhone||'—'}</td><td>${p.booker||'—'}</td><td class="col-check">&#9744;</td><td class="col-check">${p.pagante?'&#9744;':'—'}</td></tr>`;}function addSec(title,items,cls){if(!items.length)return;html+=`<tr class="cena-list-section-header"><td colspan="8">${title} (${items.length})</td></tr>`;items.forEach(p=>addRow(p,cls));}if(grouped){addSec(`DA INCASSARE — &euro;${PRICE}/persona`,people.filter(p=>p.pagante&&!p.incassato),'row-pagante');addSec('NON PAGANTI',people.filter(p=>!p.pagante),'row-nonpagante');addSec('GIA\' INCASSATO',people.filter(p=>p.pagante&&p.incassato),'row-incassato');}else{people.forEach(p=>{addRow(p,!p.pagante?'row-nonpagante':(p.incassato?'row-incassato':'row-pagante'));});}html+=`</tbody></table>`;return html;}
+
+function renderCenaList(){const sm=document.getElementById('cena-sort').value,pm=document.getElementById('cena-print-mode').value,gr=pm==='grouped',all=sortPeople(getAllPeople(),sm);if(!all.length){document.getElementById('cena-screen-list').innerHTML='';document.getElementById('cena-print-list').innerHTML='';return;}const lh=buildListHtml(all,gr),ml=gr?'Per categoria':'Lista unica';document.getElementById('cena-screen-list').innerHTML=`<div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;border-radius:12px 12px 0 0;"><strong>Elenco Completo — ${all.length} persone — &euro;${PRICE}/persona</strong> <span style="color:#64748b;font-weight:normal;">(${ml})</span></div>`+lh;document.getElementById('cena-print-list').innerHTML=lh;}
+
+function resCard(r){
+  const bk=getBooker(r), bkN=bk?bk.name:'Nuova prenotazione', bkP=bk?bk.phone:'';
+  const pHtml=(r.people||[]).map((p,i)=>{
+    const badges=[];
+    if(p.child)badges.push(`<span class="badge badge-child">${IC.child} Bambino${p.under7?' &le;7':''}</span>`);
+    if(!p.pagante)badges.push(`<span class="badge badge-nonpagante">Non pagante</span>`);
+    else if(p.incassato)badges.push(`<span class="badge badge-incassato">${IC.check} Incassato</span>`);
+    else badges.push(`<span class="badge badge-da-incassare">&euro;${PRICE} da incassare</span>`);
+    return`<div class="res-person">
+      <button class="booker-toggle ${p.isBooker?'active':''}" onclick="setBooker('${r.id}',${i})" title="${p.isBooker?'Prenotante':'Segna come prenotante'}">${p.isBooker?IC.star:IC.starOff}</button>
+      <div class="res-person-name">${p.name||'<em style="color:#94a3b8">Inserisci nome</em>'}</div>
+      ${p.phone?`<div class="res-person-phone">${IC.phone} ${p.phone}</div>`:''}
+      <div class="res-badges">${badges.join('')}</div>
+      <div class="res-actions-person">
+        <button class="btn btn-secondary" style="padding:3px 6px;" onclick="editPerson('${r.id}',${i})">${IC.edit}</button>
+        <button class="btn btn-danger" style="padding:3px 6px;" onclick="removePerson('${r.id}',${i})">${IC.x}</button>
+      </div>
+    </div>`;
+  }).join('');
+  const cnt=(r.people||[]).length;
+  const hasNoBooker=!bk;
+  return`<div class="res-card" id="res-${r.id}">
+    <div class="res-header">
+      <div class="res-header-left">
+        <div class="res-booker">${IC.star} ${bkN} <span style="font-weight:normal;color:#64748b;">(${cnt})</span></div>
+        ${bkP?`<div class="res-phone">${IC.phone} ${bkP}</div>`:''}
+      </div>
+      <div class="res-header-right"><button class="btn btn-danger" onclick="removeReservation('${r.id}')">${IC.x}</button></div>
+    </div>
+    ${hasNoBooker&&cnt>0?'<div style="padding:6px 12px;background:#eef2ff;font-size:11px;color:#6366f1;border-bottom:1px solid #e2e8f0;">'+IC.starOff+' Clicca la stella per segnare chi ha prenotato</div>':''}
+    <div class="res-body">${pHtml||'<p style="color:#94a3b8;font-size:11px;">Clicca sotto per aggiungere persone</p>'}</div>
+    <div class="res-footer"><button class="add-person-btn" onclick="addPerson('${r.id}')">+ Aggiungi persona</button></div>
+    <div id="form-${r.id}" style="display:none;"></div>
+  </div>`;
+}
+
+function setBooker(rid,idx){const r=RES.find(x=>x.id===rid);if(!r)return;(r.people||[]).forEach((p,i)=>p.isBooker=(i===idx));save('cena',RES);renderCena();}
+function addReservation(){const r={id:uid(),people:[]};RES.push(r);save('cena',RES);renderCena();addPerson(r.id);}
+function removeReservation(rid){if(!confirm('Rimuovere prenotazione?'))return;RES=RES.filter(r=>r.id!==rid);save('cena',RES);renderCena();}
+
+function addPerson(rid){const r=RES.find(x=>x.id===rid);if(!r)return;if(!r.people)r.people=[];const isFirst=r.people.length===0;const idx=r.people.length;r.people.push({name:'',child:false,under7:false,pagante:true,incassato:false,phone:'',isBooker:isFirst});save('cena',RES);renderCena();editPerson(rid,idx);}
+
+function editPerson(rid,idx){
+  const r=RES.find(x=>x.id===rid);if(!r||!r.people[idx])return;const p=r.people[idx];
+  const f=document.getElementById('form-'+rid);f.style.display='block';
+  f.innerHTML=`<div class="person-form">
+    <div class="pf-row">
+      <input type="text" id="pn-${rid}-${idx}" value="${p.name||''}" placeholder="Nome e Cognome">
+      <input type="tel" id="pp-${rid}-${idx}" value="${p.phone||''}" placeholder="Telefono (opz.)">
+    </div>
+    <div class="pf-checks">
+      <label class="pf-check ${p.child?'active':''}" id="lbl-child-${rid}-${idx}" onclick="togCheck(this,'child-${rid}-${idx}')">
+        <input type="checkbox" id="child-${rid}-${idx}" ${p.child?'checked':''}>${IC.child} Bambino
+      </label>
+      <label class="pf-check ${p.under7?'active':''}" id="lbl-under7-${rid}-${idx}" onclick="togCheck(this,'under7-${rid}-${idx}')" style="${p.child?'':'opacity:0.4;pointer-events:none'}">
+        <input type="checkbox" id="under7-${rid}-${idx}" ${p.under7?'checked':''}>&#8804;7 anni
+      </label>
+      <label class="pf-check ${p.pagante?'active-amber':''}" id="lbl-pag-${rid}-${idx}" onclick="togCheck(this,'pag-${rid}-${idx}','active-amber')" style="${p.under7?'opacity:0.4;pointer-events:none':''}">
+        <input type="checkbox" id="pag-${rid}-${idx}" ${p.pagante?'checked':''}>${IC.coin} Pagante &euro;${PRICE}
+      </label>
+      <label class="pf-check ${p.incassato?'active-green':''}" id="lbl-inc-${rid}-${idx}" onclick="togCheck(this,'inc-${rid}-${idx}','active-green')" style="${p.pagante&&!p.under7?'':'opacity:0.4;pointer-events:none'}">
+        <input type="checkbox" id="inc-${rid}-${idx}" ${p.incassato?'checked':''}>${IC.check} Incassato
+      </label>
+    </div>
+    <div class="pf-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('form-${rid}').style.display='none'">Annulla</button>
+      <button class="btn btn-primary" onclick="savePerson('${rid}',${idx})">Salva</button>
+    </div>
+  </div>`;
+  document.getElementById('pn-'+rid+'-'+idx).focus();
+}
+
+function togCheck(lbl,id,activeCls){
+  activeCls=activeCls||'active';
+  const cb=document.getElementById(id);cb.checked=!cb.checked;lbl.classList.toggle(activeCls,cb.checked);
+  const parts=id.split('-'),rid=parts[1],idx=parts[2],field=parts[0],pre=`${rid}-${idx}`;
+  if(field==='child'){
+    const u7lbl=document.getElementById('lbl-under7-'+pre),u7cb=document.getElementById('under7-'+pre);
+    const pagLbl=document.getElementById('lbl-pag-'+pre),pagCb=document.getElementById('pag-'+pre);
+    const incLbl=document.getElementById('lbl-inc-'+pre),incCb=document.getElementById('inc-'+pre);
+    if(cb.checked){
+      // Bambino ON → auto-check ≤7, auto-uncheck pagante
+      u7lbl.style.opacity='';u7lbl.style.pointerEvents='';
+      u7cb.checked=true;u7lbl.classList.add('active');
+      pagCb.checked=false;pagLbl.classList.remove('active-amber');
+      pagLbl.style.opacity='0.4';pagLbl.style.pointerEvents='none';
+      incCb.checked=false;incLbl.classList.remove('active-green');
+      incLbl.style.opacity='0.4';incLbl.style.pointerEvents='none';
+    } else {
+      u7cb.checked=false;u7lbl.classList.remove('active');
+      u7lbl.style.opacity='0.4';u7lbl.style.pointerEvents='none';
+      pagLbl.style.opacity='';pagLbl.style.pointerEvents='';
+    }
+  }
+  if(field==='under7'){
+    const pagLbl=document.getElementById('lbl-pag-'+pre),pagCb=document.getElementById('pag-'+pre);
+    const incLbl=document.getElementById('lbl-inc-'+pre),incCb=document.getElementById('inc-'+pre);
+    if(cb.checked){pagCb.checked=false;pagLbl.classList.remove('active-amber');pagLbl.style.opacity='0.4';pagLbl.style.pointerEvents='none';incCb.checked=false;incLbl.classList.remove('active-green');incLbl.style.opacity='0.4';incLbl.style.pointerEvents='none';}
+    else{pagLbl.style.opacity='';pagLbl.style.pointerEvents='';}
+  }
+  if(field==='pag'){
+    const incLbl=document.getElementById('lbl-inc-'+pre),incCb=document.getElementById('inc-'+pre);
+    if(!cb.checked){incCb.checked=false;incLbl.classList.remove('active-green');incLbl.style.opacity='0.4';incLbl.style.pointerEvents='none';}
+    else{incLbl.style.opacity='';incLbl.style.pointerEvents='';}
+  }
+}
+
+function savePerson(rid,idx){const r=RES.find(x=>x.id===rid);if(!r||!r.people[idx])return;const p=r.people[idx],pre=`${rid}-${idx}`;p.name=norm(document.getElementById('pn-'+pre).value);p.phone=document.getElementById('pp-'+pre).value.trim();p.child=document.getElementById('child-'+pre).checked;p.under7=document.getElementById('under7-'+pre).checked;p.pagante=document.getElementById('pag-'+pre).checked;p.incassato=document.getElementById('inc-'+pre).checked;if(p.under7){p.pagante=false;p.incassato=false;}if(!p.pagante)p.incassato=false;save('cena',RES);renderCena();}
+function removePerson(rid,idx){const r=RES.find(x=>x.id===rid);if(!r)return;r.people.splice(idx,1);save('cena',RES);renderCena();}
+function clearCenaData(){if(!confirm('Cancellare prenotazioni?'))return;RES=[];save('cena',RES);renderCena();}
+function exportCenaJSON(){dl(`cena_${today()}.json`,JSON.stringify({RES},null,2),'application/json');}
+function importCenaJSON(){fileIn('.json',t=>{try{const d=JSON.parse(t);if(d.RES){RES=d.RES;save('cena',RES);renderCena();alert('Importato!');}}catch(e){alert('File non valido');}});}
+function exportCenaCSV(){const all=sortPeople(getAllPeople(),document.getElementById('cena-sort').value);let csv=`Prenotante,Tel Pren.,Nome,Tipo,Pagante,Incassato,Telefono\n`;all.forEach(p=>{const tipo=p.child?(p.under7?'Bambino ≤7':'Bambino'):'Adulto';csv+=[`"${p.booker||''}"`,`"${p.bookerPhone||''}"`,`"${p.name||''}"`,`"${tipo}"`,p.pagante?'Sì':'No',p.pagante?(p.incassato?'Sì':'No'):'—',`"${p.phone||''}"`].join(',')+'\n';});dl(`cena_${today()}.csv`,csv,'text/csv');}
+
+function printPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('print-active'));document.getElementById('page-'+p).classList.add('print-active');if(p==='teams'&&document.getElementById('tab-partite').style.display!=='none')rebuildMatchTable();if(p==='cena')renderCenaList();window.print();}
+document.addEventListener('DOMContentLoaded',()=>{initStaff();initTeams();initCena();});
+</script>
+</body>
+</html>
